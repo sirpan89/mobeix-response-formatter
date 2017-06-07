@@ -1,0 +1,113 @@
+<!doctype html>
+<!--
+ This page is shown when the extension button is clicked, because the
+ "browser_action" field in manifest.json contains the "default_popup" key with
+ value "popup.html".
+ -->
+<html>
+<head>
+<title>Mobeix Response Formatter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<!--
+      - JavaScript and HTML must be in separate files: see our Content Security
+      - Policy documentation[1] for details and explanation.
+      -
+      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
+     -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="jquery-3.2.1.min.js"></script>
+<script src="contentScript.js"></script>
+<style>
+.navbar {
+    border-bottom: 1px solid #ccc;
+    background: #f9f7f7;
+	height: 60px;
+}
+#result {
+    border: 1px solid #ddd;
+    min-height: 400px;
+    background: rgb(251, 251, 251);
+    border-radius: 5px;
+    padding: 10px;
+	margin-bottom: 30px;
+}
+.headerTxt {
+    padding-bottom: 10px;
+}
+.alert {
+	margin : 20px 0px 0px
+}
+.btn {
+    min-width:150px;
+}
+.btn-primary {
+    background-color: #0275d8;
+    border-color: #0275d8;
+}
+.btn-primary:hover {
+    background-color: #025aa5;
+    border-color: #01549b;
+}
+.navbar-brand {
+	padding: 5px 15px;
+}
+li {
+padding: 5px 0px;
+}
+ul{
+	padding : 10px 0px;
+}
+div#successAlert {
+    width:250px;
+    z-index:1;
+    text-align:center;
+    margin:auto;
+	position:absolute;
+    left:0;
+    right:0;
+	top:0;
+}
+/* Mozilla based browsers */
+::-moz-selection {
+       background-color: transparent;
+       color: inherit;
+}
+
+/* Works in Safari */
+::selection {
+       background-color: transparent;
+       color: inherit;
+}
+</style>
+</head>
+<body>
+	<nav class="navbar navbar-fixed-top navbar-default">
+	  <div class="container">
+		<div class="navbar-header">
+		  <a class="navbar-brand" href="https://www.tagitmobile.com/"><img src="/tagitmobile-logo.png" alt="Tagit" title="Tagit" style="width:120px"></a>
+		</div>
+	  </div>
+	</nav>
+	<div id="successAlert" class="alert alert-success">Copied to Clipboard</div>
+	<div class="container" style="margin-top: 70px;">
+		<div class="h4 text-center headerTxt">
+			<strong>Mobeix Response Prettifier</strong>
+		</div>
+		<form class="form-horizontal">
+			<div class="form-group row">
+				<div class="col-sm-12">
+					<textarea class="form-control" id="MobeixResponse" rows="8" placeholder="Enter Mobeix Response..."></textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="text-center"><button type="button" id="format" class="btn btn-primary">Prettify</button> <button type="button" id="copyClipboardBtn" class="btn btn-success hide">Copy Prettified Response</button> <button type="button" id="reset" class="btn btn-default">Reset</button></div>
+			</div>
+		</form>
+		<div class="h4 headerTxt"><strong>Prettified Output</strong></div>
+		<div id="result">
+			<div id="exceptionMsg" class="alert alert-danger hide"><span class="glyphicon glyphicon-alert"></span> Please check whether delimiters(~)are placed properly in segments.</div>
+			<div id="output"></div>
+		</div>
+	</div>
+</body>
+</html>

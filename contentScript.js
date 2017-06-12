@@ -1,38 +1,53 @@
-$(document).ready(function(){
-		//event to reset the page
-		$("#reset").on("click", function() {
-			$("#MobeixResponse").val("");
-			$("#output").html("");
-			$("#copyClipboardBtn").addClass("hide");
-			$("#exceptionMsg").addClass("hide");
-		});
-		
-		//event to copy the output content
-		$("#copyClipboardBtn").on("click", function(){
-			selectElementContents( document.getElementById('result') );
-			document.execCommand("copy");
-			$("#successAlert").fadeIn()
-				.css({top:0})
-				.animate({top:110}, 800, function() {
-					//callback
-				});
-			
-			setTimeout(function(){$("#successAlert").fadeOut(); }, 3000);
-		});
-});
-
 document.addEventListener('DOMContentLoaded', function() {
-  var checkPageButton = document.getElementById('format');
- 
-	//event to call format method
-  checkPageButton.addEventListener('click', function() {
-	
-    chrome.tabs.getSelected(null, function(tab) {
-     var result = document.getElementById('output');
-	 result.innerHTML = format(document.getElementById('MobeixResponse').value);
-	 $("#copyClipboardBtn").removeClass("hide");
-    });
-  }, false);
+  	
+  	//event to format the mobeix response
+  	var checkPageButton = document.getElementById('format');
+ 	checkPageButton.addEventListener('click', function() {
+    	chrome.tabs.getSelected(null, function(tab) {
+     		var result = document.getElementById('output');
+	 		result.innerHTML = format(document.getElementById('MobeixResponse').value);
+	 		$("#copyClipboardBtn").removeClass("hide");
+ 		});
+	}, false);
+
+  	//event to reset the page
+	$("#reset").on("click", function() {
+		$("#MobeixResponse").val("");
+		$("#output").html("");
+		$("#copyClipboardBtn").addClass("hide");
+		$("#exceptionMsg").addClass("hide");
+	});
+
+	//event to copy the output content
+	var clipboard = new Clipboard('#copyClipboardBtn',{
+	    target: function(trigger) {
+	        return document.getElementById("result");
+	    }
+	});
+	clipboard.on('success', function(e) {
+	   e.clearSelection();
+	   $("#successAlert").removeClass("alert-danger").addClass("alert-success")
+	   		.html("Copied to Clipboard")
+	   		.fadeIn()
+			.css({top:0})
+			.animate({top:110}, 800, function() {
+				//callback
+			});
+
+	    setTimeout(function(){$("#successAlert").fadeOut(); }, 3000);
+	});
+
+	clipboard.on('error', function(e) {
+	    $("#successAlert").removeClass("alert-success").addClass("alert-danger")
+	    	.html("Failed to copy the content")
+	    	.fadeIn()
+			.css({top:0})
+			.animate({top:110}, 800, function() {
+				//callback
+			});
+		
+		setTimeout(function(){$("#successAlert").fadeOut(); }, 3000);
+	});
 }, false);
 
 //method to encode the html characters
@@ -48,18 +63,20 @@ function escapeHtml(unsafe) {
  //method to format the response
 function format (input) {
 	var formattedOutput = [];
+	var maxKeyLength = 0;
 	var tokens = input.split("~");
 	var i = 0;
 	var isException = false;
 	var isSegmentParsed = false;
 	var numberofSegments = 0;
+	var unicodeChar = /u([0-9a-zA-Z]{4})/gi;
 	var segmentKeys = [];
 
 	  while (i < tokens.length) {
 		 switch (i) {
 			case 0:
 			   var screenId = tokens[i];
-			   formattedOutput.push("<ul class=\"list-unstyled\"><li><b>Screen ID : </b> "+screenId+"</li>");
+			   formattedOutput.push("<ul class='list-unstyled'><li><b>Screen ID : </b> "+screenId+"</li>");
 			   break;
 			case 1:
 			   var cache = tokens[i];
@@ -83,58 +100,61 @@ function format (input) {
 				  isException = true;
 			   }
 			   for( var k = 0 ; k < tz.length ; k++) {
+				  maxKeyLength = Math.max(maxKeyLength, tz[k].length);
 				  segmentKeys.push(tz[k]);
 			   }
-			   //console.log("Segments Keys prepared. Count: " + segmentKeys.length);                
 			   break;
 			default:
 			   if (isSegmentParsed)
 				  break;
-			   
 			   var m = 1;
 			   try {
-				   formattedOutput.push("<table class='table'>");
+				   formattedOutput.push("<table class='table'><tbody>");
 				   for (var n = 0 ; n < segmentKeys.length ; n++) {
 					   var key = segmentKeys[n];
-					   //console.log("Parsing segment key: " + key);
 					   var numberOfValues = parseInt(key.substring(0, key.indexOf("*")));
-					   var values = []
+					   var values = [];
 					   for (var j = 0; j < numberOfValues; j++) {
-						   //console.log("tokens["+i+"]: " + tokens[i]);
-						   //console.log(tokens[i].length);
-						   var token = tokens[i];
-						   if (token != undefined) {
-							   values.push(token);
+						   var value = tokens[i];
+						   if (value != undefined) {
+						   	//converts unicode characters to human readable string.
+							value = value.replace(unicodeChar, function (match, grp) {
+									return String.fromCharCode(parseInt(grp, 16)); 
+							});
+							value = unescape(value);
+							value = value.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+							value = escapeHtml(value);
+							   values.push(value);
 						   }else {
 								isException = true;
 						   }
 							i++;
 					   }
-					   formattedOutput.push("<tr><td>" , m++ , "</td><td>" , key , "</td><td>");
+					   //following iteration for adding spaces with key string - spaces required for retaining the format while copy pasting.
+					   for(var keyStrLen = key.length; keyStrLen < maxKeyLength ; keyStrLen++) {
+					   		 key += "&nbsp";
+					   }
+
+					   formattedOutput.push("<tr><td>" , m++ , "</td><td>" , key , "</td>");
 					   var index = 1;
-					   //console.log(values);
-					   for (var z = 0; z < values.length; z++) {
-						   var r = /u([\d\w]{4})/gi;
-						   var value = values[z];
-							value = value.replace(r, function (match, grp) {
-									return String.fromCharCode(parseInt(grp, 16)); } );
-							value = unescape(value);
-							value = value.replace(/&lt;/g, '<').replace(/&gt;/g, '>') 
-						   formattedOutput.push("<p>[", index++ , "] ", escapeHtml(value) , "</p>");
+					   if(values.length >= 1) {
+					   	 formattedOutput.push("<td>[", index++ , "] ", values[0] , "</td></tr>");
 					   }
-					 
-					   if (values.length == 0) {
-						   formattedOutput.push("<font color=\"red\">NULL</font>");
+					   else {
+					   	formattedOutput.push("<td><font color='red'>NULL</font></td></tr>");
 					   }
-					   formattedOutput.push("</td></tr>");
+					   //following method for adding spaces - spaces required for retaining the format while copy pasting.
+					   var reqFillers = gapFillers(m.toString().length, maxKeyLength);
+					   for (var z = 1; z < values.length; z++) {
+						   formattedOutput.push("<tr><td class='borderless'>"+reqFillers.firstcell+"</td><td class='borderless'>"+reqFillers.secondcell+"</td><td class='borderless'>[", index++ , "] ", values[z] , "</td></tr>");
+					   }
 				   }
 			   }
 			   catch (err) {
-				  //formattedOutput.push("<font color=\"red\">Please check whether delimiters(~)are placed properly in segments.</font>" , "<br>");
 				  isException = true;
-				 console.log(err.message);
+				 alert(err.message);
 			   }
-			   formattedOutput.push("</table>");
+			   formattedOutput.push("</tbody></table>");
 			   if(isException) {
 				  $("#exceptionMsg").removeClass("hide");
 			   }
@@ -149,23 +169,14 @@ function format (input) {
 	  return formattedOutput.join("");
 }
 
-//method to select the content
-function selectElementContents(el) {
-    var body = document.body, range, sel;
-    if (document.createRange && window.getSelection) {
-        range = document.createRange();
-        sel = window.getSelection();
-        sel.removeAllRanges();
-        try {
-            range.selectNodeContents(el);
-            sel.addRange(range);
-        } catch (e) {
-            range.selectNode(el);
-            sel.addRange(range);
-        }
-    } else if (body.createTextRange) {
-        range = body.createTextRange();
-        range.moveToElementText(el);
-        range.select();
-    }
+//method to fill the spaces with html space character - this will retain the spaces while copy pasting.
+function gapFillers (firstCellStrLen, secondCellStrLen) {
+	var filler = {"firstcell": "", "secondcell" : ""};
+	for(var i = 0; i < firstCellStrLen; i++) {
+		filler.firstcell+="&nbsp";
+	}
+	for(var j = 0; j < secondCellStrLen; j++) {
+		filler.secondcell+="&nbsp";
+	}
+	return filler;
 }

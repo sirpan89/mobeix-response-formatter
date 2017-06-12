@@ -1,0 +1,56 @@
+.navbar {
+    border-bottom: 1px solid #ccc;
+    background: #f9f7f7;
+    height: 60px;
+}
+.mainContainer  {
+    margin-top:70px;
+}
+.borderless {
+    border: none !important;
+}
+#result {
+    border: 1px solid #ddd;
+    min-height: 400px;
+    background: rgb(251, 251, 251);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 30px;
+}
+.headerTxt {
+    padding-bottom: 10px;
+}
+.alert {
+    margin : 20px 0px 0px
+}
+.btn {
+    min-width:150px;
+}
+.btn-primary {
+    background-color: #0275d8;
+    border-color: #0275d8;
+}
+.btn-primary:hover {
+    background-color: #025aa5;
+    border-color: #01549b;
+}
+.navbar-brand {
+    padding: 5px 15px;
+}
+li {
+padding: 5px 0px;
+}
+ul{
+    padding : 10px 0px;
+}
+div#successAlert {
+    width:250px;
+    z-index:1;
+    text-align:center;
+    margin:auto;
+    position:fixed;
+    left:0;
+    right:0;
+    top:0;
+    font-weight:bold;
+}

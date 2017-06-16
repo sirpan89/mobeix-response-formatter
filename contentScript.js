@@ -59,8 +59,8 @@ function escapeHtml(unsafe) {
 		 .replace(/"/g, "&quot;")
 		 .replace(/'/g, "&#039;");
  }
-
- //method to format the response
+ 
+//method to format the response
 function format (input) {
 	var formattedOutput = [];
 	var maxKeyLength = 0;
@@ -138,7 +138,9 @@ function format (input) {
 					   formattedOutput.push("<tr><td>" , m++ , "</td><td>" , key , "</td>");
 					   var index = 1;
 					   if(values.length >= 1) {
-					   	 formattedOutput.push("<td>[", index++ , "] ", values[0] , "</td></tr>");
+						 var showVal  = convertToCharacters(values[0]);
+						 showVal = isJson(showVal) ? formatJSON(showVal) : showVal;
+					   	 formattedOutput.push("<td>[", index++ , "] ", showVal , "</td></tr>");
 					   }
 					   else {
 					   	formattedOutput.push("<td><font color='red'>NULL</font></td></tr>");
@@ -146,7 +148,9 @@ function format (input) {
 					   //following method for adding spaces - spaces required for retaining the format while copy pasting.
 					   var reqFillers = gapFillers(m.toString().length, maxKeyLength);
 					   for (var z = 1; z < values.length; z++) {
-						   formattedOutput.push("<tr><td class='borderless'>"+reqFillers.firstcell+"</td><td class='borderless'>"+reqFillers.secondcell+"</td><td class='borderless'>[", index++ , "] ", values[z] , "</td></tr>");
+						   var showVal  = convertToCharacters(values[z]);
+						   showVal = isJson(showVal) ? formatJSON(showVal) : showVal;
+						   formattedOutput.push("<tr><td class='borderless'>"+reqFillers.firstcell+"</td><td class='borderless'>"+reqFillers.secondcell+"</td><td class='borderless'>[", index++ , "] ", showVal , "</td></tr>");
 					   }
 				   }
 			   }
@@ -167,6 +171,33 @@ function format (input) {
 		 i++;
 	  }
 	  return formattedOutput.join("");
+}
+
+//method to convert to special characters for JSON formatter
+function convertToCharacters(str) {
+	return str
+		 .replace(/&quot;/g, '"')
+		 .replace(/&#039;/g, "'")
+		 .replace(/\\{/g, "{")
+		 .replace(/\\}/g, "}");
+ }
+ 
+//to check whether json or not
+function isJson(str) {
+    try {
+       JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+//method to format the JSON
+function formatJSON(rawVal) {
+	var formattedVal = JSON.parse(rawVal);
+	formattedVal = JSON.stringify(formattedVal, null, 4);
+	formattedVal = "<span class='pretag'>"+formattedVal+"</span>";
+	return formattedVal;
 }
 
 //method to fill the spaces with html space character - this will retain the spaces while copy pasting.

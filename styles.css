@@ -54,3 +54,7 @@ div#successAlert {
     top:0;
     font-weight:bold;
 }
+
+.pretag {
+	white-space : pre;
+}

@@ -1,27 +1,30 @@
 {
-  "manifest_version": 2,
-
+  "manifest_version": 3,
   "name": "Mobeix Response Formatter",
-  "description": "This extension will beautify Mobeix Response",
-  "version": "1.4",
-  "icons": { "128": "icon.png" },
-  "browser_action": {
-   "default_icon": "icon.png"
-  
+  "description": "Chrome Extension to Beautify Mobeix Response",
+  "version": "1.5",
+  "icons": {
+    "128": "icon.png"
   },
-  "background":{
-            "scripts":["eventPage.js"],
-			"persistent": false
-        },
+  "action": {
+    "default_icon": "icon.png"
+  },
+  "background": {
+    "service_worker": "eventPage.js"
+  },
   "content_scripts": [
     {
-	"matches": [ "file:///*"],
-    "css": [],
-    "js": ["contentScript.js"]
+      "matches": [
+        "file:///*"
+      ],
+      "css": [],
+      "js": [
+        "contentScript.js"
+      ]
     }
   ],
   "permissions": [
-   "activeTab",
-   "tabs"
-   ]
+    "activeTab",
+    "tabs"
+  ]
 }

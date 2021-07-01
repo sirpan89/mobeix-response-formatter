@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
   	//event to format the mobeix response
   	var checkPageButton = document.getElementById('format');
  	checkPageButton.addEventListener('click', function() {
-    	chrome.tabs.getSelected(null, function(tab) {
+    	chrome.tabs.query({active: true}, function(tab) {
      		var result = document.getElementById('output');
 	 		result.innerHTML = format(document.getElementById('MobeixResponse').value);
 	 		$("#copyClipboardBtn").removeClass("hide");
@@ -59,8 +59,8 @@ function escapeHtml(unsafe) {
 		 .replace(/"/g, "&quot;")
 		 .replace(/'/g, "&#039;");
  }
- 
-//method to format the response
+
+ //method to format the response
 function format (input) {
 	var formattedOutput = [];
 	var maxKeyLength = 0;
@@ -69,7 +69,7 @@ function format (input) {
 	var isException = false;
 	var isSegmentParsed = false;
 	var numberofSegments = 0;
-	var unicodeChar = /u([0-9a-zA-Z]{4})/gi;
+	var unicodeChar = /\\u([0-9a-zA-Z]{4})/gi;
 	var segmentKeys = [];
 
 	  while (i < tokens.length) {
@@ -117,10 +117,10 @@ function format (input) {
 					   for (var j = 0; j < numberOfValues; j++) {
 						   var value = tokens[i];
 						   if (value != undefined) {
-						   	//converts unicode characters to human readable string.
-							value = value.replace(unicodeChar, function (match, grp) {
+						   		//converts unicode characters to human readable string.
+								value = value.replace(unicodeChar, function (match, grp) {
 									return String.fromCharCode(parseInt(grp, 16)); 
-							});
+								});
 							value = unescape(value);
 							value = value.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 							value = escapeHtml(value);

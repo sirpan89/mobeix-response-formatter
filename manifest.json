@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Mobeix Response Formatter",
   "description": "Chrome Extension to Beautify Mobeix Response",
-  "version": "1.5",
+  "version": "1.6",
   "icons": {
     "128": "icon.png"
   },
@@ -23,7 +23,5 @@
       ]
     }
   ],
-  "permissions": [
-    "tabs"
-  ]
+  "permissions": []
 }
